@@ -1,5 +1,5 @@
 {
-  "name": "bifrost-react-form",
+  "name": "bifrost-form",
   "version": "0.1.0",
   "description": "Higher Order Component Form And Field Components",
   "main": "index.js",
@@ -38,10 +38,10 @@
   "devDependencies": {
     "@types/jest": "^22.1.1",
     "@types/prop-types": "^15.5.2",
-    "@types/react": "^16.0.35",
-    "@types/react-dom": "^16.0.3",
+    "@types/react": "^16.3.10",
+    "@types/react-dom": "^16.0.5",
     "@types/react-redux": "^5.0.14",
-    "@types/react-test-renderer": "^16.0.0",
+    "@types/react-test-renderer": "^16.0.1",
     "babel-core": "^6.26.0",
     "babel-jest": "^22.1.0",
     "babel-plugin-external-helpers": "^6.22.0",
@@ -49,8 +49,8 @@
     "babel-preset-react": "^6.24.1",
     "jest": "^22.1.4",
     "prop-types": "^15.6.0",
-    "react": "^16.2.0",
-    "react-dom": "^16.2.0",
+    "react": "^16.3.1",
+    "react-dom": "^16.3.1",
     "react-redux": "^5.0.6",
     "react-test-renderer": "^16.2.0",
     "redux": "^3.7.2",
@@ -58,6 +58,7 @@
     "rollup-plugin-babel": "^3.0.3",
     "rollup-plugin-commonjs": "^8.3.0",
     "rollup-plugin-node-resolve": "^3.0.2",
+    "tslib": "^1.9.0",
     "typescript": "^2.6.2"
   }
 }

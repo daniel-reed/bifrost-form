@@ -1,35 +1,61 @@
 import * as React from 'react'
 import * as PropTypes from 'prop-types'
-import {Field} from "./Field";
+import {field} from "./field";
 
-export interface Form {
-    deregisterField(field: Field): void;
-    getField(k: string, i: number): Field | void
+export interface form {
+    deregisterField(field: field): void
+    forEach(fn: (field?: field) => void): void
+    getField(k: string, i: number): field | void
     getValue(k: string): any
     hasError(): boolean
     hasField(k: string, i: number): boolean
-    registerField(field: Field): void;
+    registerField(field: field): void;
     setValue(k: string, i: number, v:any): void
     validate(): boolean;
-    validateField(k: string, i: number): boolean;
+    validateField(k: string, i: number): boolean
 }
 
-export function withForm() {
-    return function (WrappedComponent: React.ComponentClass) {
-        class WithForm extends React.Component<{}> implements Form {
-            static childContextTypes: object = { form: PropTypes.object.isRequired };
-            static displayName: string = `WithDevice(${getDisplayName(WrappedComponent)})`;
-            fields: Map<string, Map<number, Field>> = new Map();
+export type FormContext = {
+    form: form
+}
 
-            constructor(props: {}) {
+export type FormProps = {}
+
+export const withForm = <T extends FormProps>() => {
+    return function (WrappedComponent: React.ComponentClass<T>): React.ComponentClass<T> {
+        return class WithForm extends React.Component<T> implements form {
+            static childContextTypes: object = { form: PropTypes.object.isRequired };
+            static displayName: string = `WithForm(${getDisplayName(WrappedComponent)})`;
+            fields: Map<string, Map<number, field>> = new Map();
+
+            getChildContext(): FormContext {
+                const form: form = {
+                    deregisterField: this.deregisterField,
+                    forEach: this.forEach,
+                    getField: this.getField,
+                    getValue: this.getValue,
+                    hasError: this.hasError,
+                    hasField: this.hasField,
+                    registerField: this.registerField,
+                    setValue: this.setValue,
+                    validate: this.validate,
+                    validateField: this.validateField,
+                };
+                const context: FormContext = {
+                    form: form
+                };
+                return context;
+            }
+
+            constructor(props: T) {
                 super(props);
             }
 
             render() {
-                return <WrappedComponent/>;
+                return <WrappedComponent {...this.props}/>;
             }
 
-            deregisterField = (field: Field) => {
+            deregisterField = (field: field) => {
                 if (!this.hasField(field.getFieldName(), field.getFieldIndex())) return;
 
                 this.fields.get(field.getFieldName()).delete(field.getFieldIndex());
@@ -39,7 +65,15 @@ export function withForm() {
                 this.forceUpdate();
             };
 
-            getField = (k: string, i: number): Field | void => {
+            forEach = (fn: (field?: field) => void): void => {
+                for (let [name, fields] of this.fields) {
+                    for (let [k, field] of fields) {
+                        fn(field);
+                    }
+                }
+            };
+
+            getField = (k: string, i: number): field | void => {
                 if (!this.hasField(k, i)) return;
                 return this.fields.get(k).get(i);
             };
@@ -66,8 +100,12 @@ export function withForm() {
                 return undefined;
             };
 
-            hasError = () => {
-                // TODO
+            hasError = (): boolean => {
+                for (let [name, fields] of this.fields) {
+                    for (let [k, field] of fields) {
+                        if (field.hasError()) return true;
+                    }
+                }
                 return false;
             };
 
@@ -78,9 +116,9 @@ export function withForm() {
                 return this.fields.get(k).has(i);
             }
 
-            registerField = (field: Field) => {
+            registerField = (field: field) => {
                 if (!this.fields.has(field.getFieldName())) {
-                    this.fields.set(field.getFieldName(), new Map<number, Field>());
+                    this.fields.set(field.getFieldName(), new Map<number, field>());
                 }
                 this.fields.get(field.getFieldName()).set(field.getFieldIndex(), field);
                 this.forceUpdate();
@@ -91,9 +129,11 @@ export function withForm() {
                 this.fields.get(k).get(i).setValue(v);
             };
 
-            validate = () => {
-                // TODO
-                return true;
+            validate = (): boolean => {
+                this.forEach((field: field) => {
+                    field.validate();
+                });
+                return !this.hasError();
             };
 
             validateField = (k: string, i: number) => {
@@ -102,8 +142,8 @@ export function withForm() {
             };
         }
     }
-}
+};
 
-function getDisplayName(WrappedComponent: React.ComponentClass) {
+function getDisplayName(WrappedComponent: React.ComponentClass<any>) {
     return WrappedComponent.displayName || WrappedComponent.name || 'Component';
 }

@@ -1,2 +1,2 @@
-export { withForm, Form } from './wrappers/Form'
-export { withField, Field, Validator, Event } from './wrappers/Field'
+export { withForm } from './wrappers/Form'
+export { withField, Validator, Event } from './wrappers/Field'
