@@ -9,6 +9,7 @@ export interface form {
     getValue(k: string): any
     hasError(): boolean
     hasField(k: string, i: number): boolean
+    onSubmit(e: React.FormEvent<HTMLFormElement>): void
     registerField(field: field): void;
     setValue(k: string, i: number, v:any): void
     validate(): boolean;
@@ -40,6 +41,7 @@ export const withForm = <T extends FormProps>() => {
                     setValue: this.setValue,
                     validate: this.validate,
                     validateField: this.validateField,
+                    onSubmit: this.onSubmit,
                 };
                 const context: FormContext = {
                     form: form
@@ -140,6 +142,13 @@ export const withForm = <T extends FormProps>() => {
                 if (!this.hasField(k, i)) return false;
                 return this.fields.get(k).get(i).validate();
             };
+
+            onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+                e.preventDefault();
+                e.stopPropagation();
+                // TODO Implement
+                console.log(e);
+            }
         }
     }
 };

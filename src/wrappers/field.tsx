@@ -6,6 +6,7 @@ export interface field {
     getError(): string;
     getFieldName(): string;
     getFieldIndex(): number;
+    getFocus(): boolean;
     getLabel(): string;
     getValue(): any;
     hasError(): boolean;
@@ -34,9 +35,10 @@ export type FieldProps = {
     fieldName: string
     label: string
     validators?: Array<Validator>
-    onChange?: (event: Event) => void
-    onBlur?: (event: Event) => void
-    onFocus?: (event: Event) => void
+    onChange?: (event: React.ChangeEvent<any>) => void
+    onBlur?: (event: React.FocusEvent<any>) => void
+    onFocus?: (event: React.FocusEvent<any>) => void
+    value?: any
 }
 
 export const withField = <T extends FieldProps>() => {
@@ -75,6 +77,7 @@ export const withField = <T extends FieldProps>() => {
                     getError: this.getError,
                     getFieldName: this.getFieldName,
                     getFieldIndex: this.getFieldIndex,
+                    getFocus: this.getFocus,
                     getLabel: this.getLabel,
                     getValue: this.getValue,
                     hasError: this.hasError,
@@ -108,6 +111,7 @@ export const withField = <T extends FieldProps>() => {
 
             cleanProps = (): any  => {
                 const ptProps = Object.assign({}, this.props as any, this.orideProps);
+                ptProps.value = this.value;
                 for (const k of WithField.stripProps) {
                     delete ptProps[k];
                 }
@@ -124,6 +128,10 @@ export const withField = <T extends FieldProps>() => {
 
             getFieldIndex = (): number => {
                 return this.props.fieldIndex;
+            };
+
+            getFocus = (): boolean => {
+                return this.focus;
             };
 
             getLabel = (): string => {
@@ -153,15 +161,15 @@ export const withField = <T extends FieldProps>() => {
                 return this.error === undefined;
             };
 
-            handleChange = (event: Event): void => {
-                this.setValue(event.currentTarget.value);
+            handleChange = (event: React.ChangeEvent<any>): void => {
+                this.setValue(event.target.value);
                 if (this.error !== undefined) this.validate();
                 if (typeof this.props.onChange === 'function') {
                     this.props.onChange(event);
                 }
             };
 
-            handleFocus = (event: Event): void => {
+            handleFocus = (event: React.FocusEvent<any>): void => {
                 this.focus = true;
                 this.forceUpdate();
                 if (typeof this.props.onFocus === 'function') {
@@ -169,7 +177,7 @@ export const withField = <T extends FieldProps>() => {
                 }
             };
 
-            handleBlur = (event: Event): void => {
+            handleBlur = (event: React.FocusEvent<any>): void => {
                 this.focus = false;
                 this.validate();
                 if (typeof this.props.onBlur === 'function') {
