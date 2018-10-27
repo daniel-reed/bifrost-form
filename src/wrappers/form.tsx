@@ -1,5 +1,4 @@
 import * as React from 'react'
-import * as PropTypes from 'prop-types'
 import {field} from "./field";
 
 export interface form {
@@ -16,21 +15,23 @@ export interface form {
     validateField(k: string, i: number): boolean
 }
 
-export type FormContext = {
-    form: form
-}
-
 export type FormProps = {}
+
+export const FormContext = React.createContext({});
 
 export const withForm = <T extends FormProps>() => {
     return function (WrappedComponent: React.ComponentClass<T>): React.ComponentClass<T> {
         return class WithForm extends React.Component<T> implements form {
-            static childContextTypes: object = { form: PropTypes.object.isRequired };
+
+
             static displayName: string = `WithForm(${getDisplayName(WrappedComponent)})`;
             fields: Map<string, Map<number, field>> = new Map();
+            form: form;
 
-            getChildContext(): FormContext {
-                const form: form = {
+            constructor(props: T) {
+                super(props);
+
+                this.form = {
                     deregisterField: this.deregisterField,
                     forEach: this.forEach,
                     getField: this.getField,
@@ -42,19 +43,15 @@ export const withForm = <T extends FormProps>() => {
                     validate: this.validate,
                     validateField: this.validateField,
                     onSubmit: this.onSubmit,
-                };
-                const context: FormContext = {
-                    form: form
-                };
-                return context;
-            }
-
-            constructor(props: T) {
-                super(props);
+                }
             }
 
             render() {
-                return <WrappedComponent {...this.props}/>;
+                return (
+                    <FormContext.Provider value={this.form}>
+                        <WrappedComponent {...this.props}/>
+                    </FormContext.Provider>
+                );
             }
 
             deregisterField = (field: field) => {

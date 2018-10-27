@@ -1,26 +1,27 @@
 import * as React from 'react'
-import * as PropTypes from 'prop-types'
-import {FieldContext} from "../wrappers/field";
+import {field, FieldContext} from "../wrappers/field";
 import {mergeClass} from "./ClassHelpers";
 
-export type Props = {
+type Props = {
     bemElement?: string
 }
 
-export type ErrorProps = Props & React.HTMLProps<HTMLLabelElement>
+export type UErrorProps = Props & React.HTMLProps<HTMLLabelElement>
 
-export class Error extends React.Component<ErrorProps> {
-    static contextTypes: object = {
-        field: PropTypes.object.isRequired,
-    };
-    static defaultProps: Partial<ErrorProps> = {
+export class Error extends React.Component<UErrorProps> {
+    static contextType = FieldContext;
+    static defaultProps: Partial<UErrorProps> = {
         bemElement: "bifrost-field__error"
     };
+    field: field;
 
-    context: FieldContext;
+    constructor(props: UErrorProps, context: field) {
+        super(props, context);
+        this.field = context;
+    }
 
     render() {
-        if (!this.context.field.hasError()) {
+        if (!this.field.hasError()) {
             return null;
         }
 
@@ -29,7 +30,7 @@ export class Error extends React.Component<ErrorProps> {
 
         return (
             <label className={cn} {...ptProps}>
-                {this.context.field.getError()}
+                {this.field.getError()}
             </label>
         );
     }

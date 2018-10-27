@@ -1,18 +1,11 @@
 import * as React from 'react'
-import * as PropTypes from 'prop-types'
 import {Field} from "./Field";
-import {FieldContext, FieldProps, withField} from "../wrappers/field";
+import {FieldProps, withField} from "../wrappers/field";
 import {mergeClass} from "./ClassHelpers";
 
-export type InputProps = React.HTMLProps<HTMLInputElement> & FieldProps
+export type UInputProps = React.HTMLProps<HTMLInputElement> & FieldProps
 
-export class UTextInput extends React.Component<InputProps> {
-    static contextTypes = {
-        field: PropTypes.object.isRequired
-    };
-
-    context: FieldContext;
-
+export class UTextInput extends React.Component<UInputProps> {
     render() {
         const { type, value, className, ...ptProps } = this.props;
         const cn = mergeClass(className, ["bifrost-field__input"]);
@@ -25,4 +18,4 @@ export class UTextInput extends React.Component<InputProps> {
     }
 }
 
-export const TextInput = withField<InputProps>()(UTextInput);
+export const TextInput = withField<UInputProps>()(UTextInput);

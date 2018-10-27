@@ -1,24 +1,25 @@
 import * as React from 'react'
-import * as PropTypes from 'prop-types'
-import {FormContext, FormProps as WFormProps, withForm} from "../wrappers/form";
+import {form, FormContext, FormProps, withForm} from "../wrappers/form";
 import {mergeClass} from "./ClassHelpers";
 
-export type FormProps = React.HTMLProps<HTMLFormElement> & WFormProps
+export type UFormProps = React.HTMLProps<HTMLFormElement> & FormProps
 
-export class UForm extends React.Component<FormProps> {
-    static contextTypes = {
-        form: PropTypes.object.isRequired
-    };
+export class UForm extends React.Component<UFormProps> {
+    static contextType = FormContext;
+    form: form;
 
-    context: FormContext;
+    constructor(props: FormProps, context: form) {
+        super(props, context);
+        this.form = context;
+    }
 
     render() {
         const { onSubmit, className, ...ptProps } = this.props;
         const cn = mergeClass(className, ["bifrost-form"]);
         return (
-            <form className={cn} onSubmit={this.context.form.onSubmit} {...ptProps}/>
+            <form className={cn} onSubmit={this.form.onSubmit} {...ptProps}/>
         );
     }
 }
 
-export const Form = withForm<FormProps>()(UForm);
+export const Form = withForm<UFormProps>()(UForm);

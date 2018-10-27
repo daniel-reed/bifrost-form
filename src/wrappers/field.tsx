@@ -1,6 +1,5 @@
 import * as React from 'react'
-import * as PropTypes from 'prop-types'
-import {FormContext} from "./form";
+import {form, FormContext} from "./form";
 
 export interface field {
     getError(): string;
@@ -18,16 +17,6 @@ export interface Validator {
     (value: any, field: field): boolean | string;
 }
 
-export type Event = {
-    currentTarget: {
-        value: any
-    }
-}
-
-export type FieldContext = {
-    field: field
-}
-
 export type FieldProps = {
     defaultError?: string
     defaultValue?: any
@@ -41,6 +30,8 @@ export type FieldProps = {
     value?: any
 }
 
+export const FieldContext = React.createContext({});
+
 export const withField = <T extends FieldProps>() => {
     return function (WrappedComponent: React.ComponentClass<T>): React.ComponentClass<T> {
         const defaultProps: Partial<FieldProps> = {
@@ -50,11 +41,7 @@ export const withField = <T extends FieldProps>() => {
         };
 
         class WithField extends React.Component<T> implements field {
-
-            static childContextTypes: object = { field: PropTypes.object.isRequired };
-            static contextTypes: object = {
-                form: PropTypes.object.isRequired,
-            };
+            static contextType = FormContext;
             static defaultProps: Partial<T> = defaultProps as Partial<T>;
             static displayName: string = `WithField(${getDisplayName(WrappedComponent)})`;
             static stripProps: Array<string> = [
@@ -66,14 +53,24 @@ export const withField = <T extends FieldProps>() => {
                 "validators"
             ];
 
-            context: FormContext;
             error?: string;
             focus: boolean;
             orideProps: Partial<FieldProps>;
             value?: any;
+            form: form;
+            field: field;
 
-            getChildContext(): FieldContext {
-                const field: field = {
+            constructor(props: T, context: form) {
+                super(props, context);
+                this.value = props.defaultValue;
+                this.orideProps = {
+                    onChange: this.handleChange,
+                    onBlur: this.handleBlur,
+                    onFocus: this.handleFocus,
+                };
+                this.form = context;
+                this.form.registerField(this);
+                this.field = {
                     getError: this.getError,
                     getFieldName: this.getFieldName,
                     getFieldIndex: this.getFieldIndex,
@@ -83,40 +80,30 @@ export const withField = <T extends FieldProps>() => {
                     hasError: this.hasError,
                     setValue: this.setValue,
                     validate: this.validate,
-                };
-                const context: FieldContext = {
-                    field: field
-                };
-                return context
-            }
-
-            constructor(props: T, context: FormContext) {
-                super(props);
-                this.value = props.defaultValue;
-                this.orideProps = {
-                    onChange: this.handleChange,
-                    onBlur: this.handleBlur,
-                    onFocus: this.handleFocus,
-                };
-                context.form.registerField(this);
+                }
             }
 
             render() {
-                return <WrappedComponent {...this.cleanProps()}/>;
-            }
-
-            componentWillUnmount() {
-                this.context.form.deregisterField(this);
+                return (
+                    <FieldContext.Provider value={this.field}>
+                        <WrappedComponent {...this.cleanProps()}/>
+                    </FieldContext.Provider>
+                );
             }
 
             cleanProps = (): any  => {
                 const ptProps = Object.assign({}, this.props as any, this.orideProps);
                 ptProps.value = this.value;
+                ptProps.name = this.getFieldName() + "_" + this.getFieldIndex();
                 for (const k of WithField.stripProps) {
                     delete ptProps[k];
                 }
                 return ptProps;
             };
+
+            componentWillUnmount() {
+                this.form.deregisterField(this);
+            }
 
             getError = (): string => {
                 return this.hasError() ? this.error : "";
@@ -192,7 +179,7 @@ export const withField = <T extends FieldProps>() => {
             setValue = (v?: any) => {
                 this.value = v;
                 this.forceUpdate();
-            }
+            };
         }
         return WithField
     }

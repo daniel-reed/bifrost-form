@@ -1,2 +1,6 @@
-export { withForm } from './wrappers/Form'
-export { withField, Validator, Event } from './wrappers/Field'
+export { form, FormProps, FormContext, withForm } from './wrappers/form'
+export { field, Validator, FieldProps, FieldContext, withField} from './wrappers/field'
+export { UFormProps, UForm, Form } from './components/Form'
+export { UInputProps, UTextInput, TextInput } from './components/Input'
+export { ULabelProps, Label } from './components/Label'
+export { UErrorProps, Error } from './components/Error'

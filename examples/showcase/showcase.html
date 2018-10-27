@@ -1,0 +1,45 @@
+<!doctype html>
+<html class="no-js" lang="">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <title>Showcase</title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+</head>
+
+<body>
+<div id="rmount"></div>
+<script crossorigin src="https://unpkg.com/react@16/umd/react.development.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@16/umd/react-dom.development.js"></script>
+<script crossorigin src="https://unpkg.com/create-react-class@15.6.0-rc.0/create-react-class.min.js"></script>
+<script src="../../build/browser/index.js"></script>
+<script>
+    function ready(fn) {
+        if (document.attachEvent ? document.readyState === "complete" : document.readyState !== "loading"){
+            fn();
+        } else {
+            document.addEventListener('DOMContentLoaded', fn);
+        }
+    }
+
+    ready(function () {
+        var e = React.createElement;
+        var ShowCase = createReactClass({
+            render: function () {
+                return e(bifrost.Form, null,
+                    e(bifrost.TextInput, {fieldName: 'firstName', label: 'First Name: '}),
+                    e(bifrost.TextInput, {fieldName: 'lastName', label: 'Last Name: '}),
+                    e(bifrost.TextInput, {fieldName: 'phone', fieldIndex: 0, label: 'Home Phone: '}),
+                    e(bifrost.TextInput, {fieldName: 'phone', fieldIndex: 1, label: 'Cell Phone: '})
+                )
+            }
+        });
+
+        ReactDOM.render(e(ShowCase), document.getElementById('rmount'));
+    });
+</script>
+</body>
+
+</html>

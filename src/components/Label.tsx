@@ -1,36 +1,39 @@
 import * as React from 'react'
-import * as PropTypes from 'prop-types'
-import {FieldContext} from "../wrappers/field";
+import {field, FieldContext} from "../wrappers/field";
 import {mergeClass} from "./ClassHelpers";
+import {UErrorProps} from "./Error";
 
-export type Props = {
+type Props = {
     bemElement?: string
 }
 
-export type LabelProps = Props & React.HTMLProps<HTMLLabelElement>
+export type ULabelProps = Props & React.HTMLProps<HTMLLabelElement>
 
-export class Label extends React.Component<LabelProps> {
-    static contextTypes: object = {
-        field: PropTypes.object.isRequired,
-    };
-    static defaultProps: Partial<LabelProps> = {
+export class Label extends React.Component<ULabelProps> {
+    static contextType = FieldContext;
+    static defaultProps: Partial<ULabelProps> = {
         bemElement: "bifrost-field__label"
     };
 
-    context: FieldContext;
+    field: field;
+
+    constructor(props: UErrorProps, context: field) {
+        super(props, context);
+        this.field = context;
+    }
 
     render() {
         const { bemElement, className, ...ptProps } = this.props;
 
         let classes = [bemElement];
-        if (this.context.field.hasError()) {
+        if (this.field.hasError()) {
             classes.push(`${bemElement}--error`)
         }
         const cn = mergeClass(className, classes);
 
         return (
             <label className={cn} {...ptProps}>
-                {this.context.field.getLabel()}
+                {this.field.getLabel()}
             </label>
         );
     }
