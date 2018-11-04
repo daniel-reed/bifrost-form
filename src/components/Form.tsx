@@ -1,14 +1,14 @@
 import * as React from 'react'
-import {form, FormContext, FormProps, withForm} from "../wrappers/form";
+import {IForm, FormContext, FormProps, asForm} from "../wrappers/form";
 import {mergeClass} from "./ClassHelpers";
 
 export type UFormProps = React.HTMLProps<HTMLFormElement> & FormProps
 
 export class UForm extends React.Component<UFormProps> {
     static contextType = FormContext;
-    form: form;
+    form: IForm;
 
-    constructor(props: FormProps, context: form) {
+    constructor(props: UFormProps, context: IForm) {
         super(props, context);
         this.form = context;
     }
@@ -22,4 +22,4 @@ export class UForm extends React.Component<UFormProps> {
     }
 }
 
-export const Form = withForm<UFormProps>()(UForm);
+export const Form = asForm<UFormProps>()(UForm);

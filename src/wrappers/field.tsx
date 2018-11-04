@@ -1,20 +1,188 @@
 import * as React from 'react'
-import {form, FormContext} from "./form";
+import {IForm, FormContext} from "./form";
+import {getDisplayName} from "./util";
+import {Validator} from "../validation/validator";
 
-export interface field {
-    getError(): string;
-    getFieldName(): string;
-    getFieldIndex(): number;
-    getFocus(): boolean;
-    getLabel(): string;
-    getValue(): any;
-    hasError(): boolean;
-    setValue(v: any): void;
-    validate(v?: any): boolean;
+export class Field implements IField {
+    component: React.Component<any, any>;
+    defaultError: string = "Invalid Value";
+    defaultValue: any;
+    error?: string;
+    fieldIndex: number = 0;
+    fieldName: string;
+    label: string;
+    focus: boolean;
+    type: IFieldType = IFieldType.String;
+    validators: Validator[];
+    value?: any;
+
+    constructor(component: React.Component<any, any>) {
+        this.component = component;
+        this.validators = [];
+    }
+
+    getDefaultError = (): string =>  {
+        return this.defaultError;
+    };
+
+    setDefaultError = (error: string, update: boolean = true): Field => {
+        this.defaultError = error;
+        if (update) this.component.forceUpdate();
+        return this;
+    };
+
+    getDefaultValue = (): any => {
+        return this.defaultValue;
+    };
+
+    setDefaultValue = (value: any, update: boolean = true): Field => {
+        this.value = value;
+        if (update) this.component.forceUpdate();
+        return this;
+    };
+
+    getError = (): string => {
+        return this.hasError() ? this.error : "";
+    };
+
+    setError = (error: string, update: boolean = true): Field => {
+        this.error = error;
+        if (update) this.component.forceUpdate();
+        return this;
+    };
+
+    getFieldName = (): string => {
+        return this.fieldName;
+    };
+
+    setFieldName = (fieldName: string, update: boolean = true): Field => {
+        this.fieldName = fieldName;
+        if (update) this.component.forceUpdate();
+        return this;
+    };
+
+    getFieldIndex = (): number => {
+        return this.fieldIndex;
+    };
+
+    setFieldIndex = (fieldIndex: number, update: boolean = true): Field => {
+        this.fieldIndex = fieldIndex;
+        if (update) this.component.forceUpdate();
+        return this;
+    };
+
+    getFocus = (): boolean => {
+        return this.focus;
+    };
+
+    setFocus = (focus: boolean, update: boolean = true): Field => {
+        this.focus = focus;
+        if (update) this.component.forceUpdate();
+        return this;
+    };
+
+    getLabel = (): string => {
+        return this.component.props.label;
+    };
+
+    setLabel = (label: string, update: boolean = true): Field => {
+        this.label = label;
+        if (update) this.component.forceUpdate();
+        return this;
+    };
+
+    hasError = (): boolean => {
+        return this.error !== undefined
+    };
+
+    validate = (): boolean => {
+        for (let i = 0; i < this.validators.length; i++) {
+            let result = this.validators[i](this.value, this);
+            if (typeof result === "string") {
+                this.error = result;
+                break;
+            }
+            if (!result) {
+                this.error = this.defaultError;
+                break;
+            }
+            if (result) {
+                this.error = undefined;
+            }
+        }
+        this.component.forceUpdate();
+        return this.error === undefined;
+    };
+
+    getType = (): IFieldType => {
+        return this.type;
+    };
+
+    setType = (type: IFieldType, update: boolean = true): IField => {
+        this.type = type;
+        if (update) this.component.forceUpdate();
+        return this;
+    };
+
+    getValidators = (): Validator[] => {
+        return this.validators;
+    };
+
+    addValidator = (validator: Validator, update: boolean = true): Field => {
+        this.validators.push(validator);
+        if (update) this.component.forceUpdate();
+        return this;
+    };
+
+    removeValidator = (validator: Validator, update: boolean = true): Field => {
+        const index = this.validators.indexOf(validator);
+        if (index === -1) return;
+        this.validators.splice(index, 1);
+        if (update) this.component.forceUpdate();
+        return this;
+    };
+
+    getValue = (): any => {
+        return this.value;
+    };
+
+    setValue = (v?: any, update: boolean = true): Field => {
+        this.value = v;
+        if (update) this.component.forceUpdate();
+        return this;
+    };
 }
 
-export interface Validator {
-    (value: any, field: field): boolean | string;
+export enum IFieldType {
+    Object = "object",
+    Array = "array",
+    String = "string"
+}
+
+export interface IField {
+    getDefaultError(): any;
+    setDefaultError(error: string, update?: boolean): IField;
+    getDefaultValue(): any;
+    setDefaultValue(val: any, update?: boolean): IField;
+    getError(): string;
+    setError(error: string, update?: boolean): IField;
+    getFieldName(): string;
+    setFieldName(fieldName: string, update?: boolean): IField;
+    getFieldIndex(): number;
+    setFieldIndex(fieldIndex: number, update?: boolean): IField;
+    getFocus(): boolean;
+    setFocus(focus: boolean, update?: boolean): IField;
+    getLabel(): string;
+    setLabel(label: string, update?: boolean): IField;
+    getType(): IFieldType;
+    setType(type: IFieldType, update?: boolean): IField;
+    getValidators(): Validator[];
+    addValidator(validator: Validator, update?: boolean): IField;
+    removeValidator(validator: Validator, update?: boolean): IField;
+    getValue(): any;
+    setValue(v: any, update?: boolean): IField;
+    hasError(): boolean;
+    validate(v?: any): boolean;
 }
 
 export type FieldProps = {
@@ -32,7 +200,7 @@ export type FieldProps = {
 
 export const FieldContext = React.createContext({});
 
-export const withField = <T extends FieldProps>() => {
+export const asField = <T extends FieldProps>() => {
     return function (WrappedComponent: React.ComponentClass<T>): React.ComponentClass<T> {
         const defaultProps: Partial<FieldProps> = {
             defaultError: "Invalid Value",
@@ -40,10 +208,10 @@ export const withField = <T extends FieldProps>() => {
             validators: [],
         };
 
-        class WithField extends React.Component<T> implements field {
+        class AsField extends React.Component<T> {
             static contextType = FormContext;
             static defaultProps: Partial<T> = defaultProps as Partial<T>;
-            static displayName: string = `WithField(${getDisplayName(WrappedComponent)})`;
+            static displayName: string = `AsField(${getDisplayName(WrappedComponent)})`;
             static stripProps: Array<string> = [
                 "defaultError",
                 "defaultValue",
@@ -53,34 +221,33 @@ export const withField = <T extends FieldProps>() => {
                 "validators"
             ];
 
-            error?: string;
-            focus: boolean;
+            form: IForm;
+            field: IField;
             orideProps: Partial<FieldProps>;
-            value?: any;
-            form: form;
-            field: field;
 
-            constructor(props: T, context: form) {
+            constructor(props: T, context: IForm) {
                 super(props, context);
-                this.value = props.defaultValue;
                 this.orideProps = {
                     onChange: this.handleChange,
                     onBlur: this.handleBlur,
                     onFocus: this.handleFocus,
                 };
                 this.form = context;
-                this.form.registerField(this);
-                this.field = {
-                    getError: this.getError,
-                    getFieldName: this.getFieldName,
-                    getFieldIndex: this.getFieldIndex,
-                    getFocus: this.getFocus,
-                    getLabel: this.getLabel,
-                    getValue: this.getValue,
-                    hasError: this.hasError,
-                    setValue: this.setValue,
-                    validate: this.validate,
+                this.field = new Field(this);
+                this.field.setDefaultValue(props.defaultValue, false);
+                this.field.setDefaultError(props.defaultError, false);
+                this.field.setFieldIndex(props.fieldIndex, false);
+                this.field.setFieldName(props.fieldName, false);
+                if (props.validators) {
+                    for (const validator of props.validators) {
+                        this.field.addValidator(validator, false);
+                    }
                 }
+                // TODO This should be valuer rather than defaultValue?
+                this.field.setValue(props.defaultValue, false);
+                this.field.setLabel(props.label, false);
+
+                this.form.registerField(this.field);
             }
 
             render() {
@@ -93,71 +260,32 @@ export const withField = <T extends FieldProps>() => {
 
             cleanProps = (): any  => {
                 const ptProps = Object.assign({}, this.props as any, this.orideProps);
-                ptProps.value = this.value;
-                ptProps.name = this.getFieldName() + "_" + this.getFieldIndex();
-                for (const k of WithField.stripProps) {
+                ptProps.value = this.field.getValue();
+                ptProps.name = this.field.getFieldName() + "_" + this.field.getFieldIndex();
+                for (const k of AsField.stripProps) {
                     delete ptProps[k];
                 }
                 return ptProps;
             };
 
             componentWillUnmount() {
-                this.form.deregisterField(this);
+                this.form.deregisterField(this.field);
             }
 
-            getError = (): string => {
-                return this.hasError() ? this.error : "";
-            };
-
-            getFieldName = (): string => {
-                return this.props.fieldName;
-            };
-
-            getFieldIndex = (): number => {
-                return this.props.fieldIndex;
-            };
-
-            getFocus = (): boolean => {
-                return this.focus;
-            };
-
-            getLabel = (): string => {
-                return this.props.label;
-            };
-
-            hasError = (): boolean => {
-                return this.error !== undefined
-            };
-
-            validate = (): boolean => {
-                for (let i = 0; i < this.props.validators.length; i++) {
-                    let result = this.props.validators[i](this.value, this);
-                    if (typeof result === "string") {
-                        this.error = result;
-                        break;
-                    }
-                    if (!result) {
-                        this.error = this.props.defaultError;
-                        break;
-                    }
-                    if (result) {
-                        this.error = undefined;
-                    }
-                }
-                this.forceUpdate();
-                return this.error === undefined;
-            };
+            componentWillReceiveProps() {
+                // TODO Make sure field is up to date with props.
+            }
 
             handleChange = (event: React.ChangeEvent<any>): void => {
-                this.setValue(event.target.value);
-                if (this.error !== undefined) this.validate();
+                this.field.setValue(event.target.value);
+                if (this.field.getError() !== undefined) this.field.validate();
                 if (typeof this.props.onChange === 'function') {
                     this.props.onChange(event);
                 }
             };
 
             handleFocus = (event: React.FocusEvent<any>): void => {
-                this.focus = true;
+                this.field.setFocus(true);
                 this.forceUpdate();
                 if (typeof this.props.onFocus === 'function') {
                     this.props.onFocus(event)
@@ -165,26 +293,13 @@ export const withField = <T extends FieldProps>() => {
             };
 
             handleBlur = (event: React.FocusEvent<any>): void => {
-                this.focus = false;
-                this.validate();
+                this.field.setFocus(false);
+                this.field.validate();
                 if (typeof this.props.onBlur === 'function') {
-                    this.props.onFocus(event)
+                    this.props.onBlur(event)
                 }
             };
-
-            getValue = (): any => {
-                return this.value;
-            };
-
-            setValue = (v?: any) => {
-                this.value = v;
-                this.forceUpdate();
-            };
         }
-        return WithField
+        return AsField
     }
 };
-
-function getDisplayName(WrappedComponent: React.ComponentClass<any>) {
-    return WrappedComponent.displayName || WrappedComponent.name || 'Component';
-}

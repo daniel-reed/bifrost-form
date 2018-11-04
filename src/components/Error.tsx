@@ -1,5 +1,5 @@
 import * as React from 'react'
-import {field, FieldContext} from "../wrappers/field";
+import {IField, FieldContext} from "../wrappers/field";
 import {mergeClass} from "./ClassHelpers";
 
 type Props = {
@@ -13,9 +13,9 @@ export class Error extends React.Component<UErrorProps> {
     static defaultProps: Partial<UErrorProps> = {
         bemElement: "bifrost-field__error"
     };
-    field: field;
+    field: IField;
 
-    constructor(props: UErrorProps, context: field) {
+    constructor(props: UErrorProps, context: IField) {
         super(props, context);
         this.field = context;
     }

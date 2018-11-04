@@ -1,5 +1,5 @@
 import * as React from 'react'
-import {field, FieldContext} from "../wrappers/field";
+import {IField, FieldContext} from "../wrappers/field";
 import {mergeClass} from "./ClassHelpers";
 import {UErrorProps} from "./Error";
 
@@ -15,9 +15,9 @@ export class Label extends React.Component<ULabelProps> {
         bemElement: "bifrost-field__label"
     };
 
-    field: field;
+    field: IField;
 
-    constructor(props: UErrorProps, context: field) {
+    constructor(props: UErrorProps, context: IField) {
         super(props, context);
         this.field = context;
     }

@@ -1,6 +1,6 @@
 import * as React from 'react'
 import {Field} from "./Field";
-import {FieldProps, withField} from "../wrappers/field";
+import {FieldProps, asField} from "../wrappers/field";
 import {mergeClass} from "./ClassHelpers";
 
 export type UInputProps = React.HTMLProps<HTMLInputElement> & FieldProps
@@ -18,4 +18,4 @@ export class UTextInput extends React.Component<UInputProps> {
     }
 }
 
-export const TextInput = withField<UInputProps>()(UTextInput);
+export const TextInput = asField<UInputProps>()(UTextInput);
