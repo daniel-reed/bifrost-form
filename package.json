@@ -7,7 +7,7 @@
     "build": "npm run build:main && npm run build:module && npm run build:browser",
     "build:main": "tsc -p tsconfig.json",
     "build:module": "tsc -p config/exports/tsconfig.module.json",
-    "build:browser": "rollup -c config/exports/rollup.config.js -f iife -o build/browser/index.js -n bifrost",
+    "build:browser": "rollup -c config/exports/rollup.config.js -f iife -o build/browser/index.js -n fo",
     "test": "jest"
   },
   "repository": {

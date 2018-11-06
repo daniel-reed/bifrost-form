@@ -4,6 +4,7 @@ import {getDisplayName} from "./util";
 import {Validator} from "../validation/validator";
 
 export class Form implements IForm {
+    name: string;
     fields: Map<string, IField[]> = new Map();
     component: React.Component<any, any>;
     validators: Validator[];
@@ -24,13 +25,10 @@ export class Form implements IForm {
         this.component.forceUpdate();
     };
 
-    forEach = (fn: (field?: IField) => boolean | void): void => {
-        main:
+    forEach = (fn: (field?: IField) => any): void => {
         for (let [name, fields] of this.fields) {
             for (let [k, field] of fields.entries()) {
-                if (fn(field) === false) {
-                    break main;
-                }
+                fn(field);
             }
         }
     };
@@ -69,6 +67,16 @@ export class Form implements IForm {
         }
 
         return undefined;
+    };
+
+    getFormName = (): string => {
+        return this.name;
+    };
+
+    setFormName = (name: string, update: boolean = true): Form => {
+        this.name = name;
+        if (update) this.component.forceUpdate();
+        return this;
     };
 
     getFormValue = (): any => {
@@ -165,6 +173,8 @@ export interface IForm {
     getField(k: string, i: number): IField | void
     getFields(k: string): IField[] | void
     getValue(k?: string): any
+    getFormName(): string
+    setFormName(name: string, update?: boolean): IForm;
     getFormValue(): any
     hasError(): boolean
     hasField(k: string, i: number): boolean
@@ -180,7 +190,9 @@ export interface IForm {
     validateField(k: string, i: number): boolean
 }
 
-export type FormProps = {}
+export type FormProps = {
+    name: string
+}
 
 export const FormContext = React.createContext({});
 
@@ -193,6 +205,7 @@ export const asForm = <T extends FormProps>() => {
             constructor(props: T) {
                 super(props);
                 this.form = new Form(this);
+                this.form.setFormName(props.name, false);
             }
 
             render() {

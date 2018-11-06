@@ -21,17 +21,13 @@ export class Error extends React.Component<UErrorProps> {
     }
 
     render() {
-        if (!this.field.hasError()) {
-            return null;
-        }
-
-        const { bemElement, className, ...ptProps } = this.props;
+        const { bemElement, className, id, ...ptProps } = this.props;
         const cn = mergeClass(className, [bemElement]);
 
         return (
-            <label className={cn} {...ptProps}>
+            <span id={this.field.getErrorId()} className={cn} {...ptProps} role="alert">
                 {this.field.getError()}
-            </label>
+            </span>
         );
     }
 }

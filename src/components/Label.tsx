@@ -23,7 +23,7 @@ export class Label extends React.Component<ULabelProps> {
     }
 
     render() {
-        const { bemElement, className, ...ptProps } = this.props;
+        const { bemElement, className, htmlFor, ...ptProps } = this.props;
 
         let classes = [bemElement];
         if (this.field.hasError()) {
@@ -32,7 +32,7 @@ export class Label extends React.Component<ULabelProps> {
         const cn = mergeClass(className, classes);
 
         return (
-            <label className={cn} {...ptProps}>
+            <label htmlFor={this.field.getHtmlName()} className={cn} {...ptProps}>
                 {this.field.getLabel()}
             </label>
         );

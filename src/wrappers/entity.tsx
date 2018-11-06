@@ -14,6 +14,9 @@ export class Entity extends Field implements IEntity  {
         super(component);
         this.component = component;
         this.form = new Form(component);
+        this.form.getFormName = function() {
+            return this.parent.getFormName() + "_" + this.getFieldName();
+        }.bind(this);
     }
 
     getForm = (): IForm => {
@@ -40,6 +43,10 @@ export class Entity extends Field implements IEntity  {
         return this.form.validate();
     };
 
+    hasError = (): boolean => {
+        return this.form.hasError();
+    };
+
     getValue = (): any => {
         return this.form.getFormValue();
     };
@@ -58,6 +65,10 @@ export class Entity extends Field implements IEntity  {
     removeValidator = (validator: Validator, update: boolean = true): Entity => {
         this.form.removeValidator(validator, update);
         return this;
+    };
+
+    getFormName = (): string => {
+        return this.getParent().getFormName() + "_" + this.getFieldName();
     }
 }
 

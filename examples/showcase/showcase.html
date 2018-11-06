@@ -26,31 +26,45 @@
     }
 
     ready(function () {
+        function isNotEmpty(val, field) {
+            return !!val;
+        }
+
+        function matches(exp, msg) {
+            return function (val, field) {
+                exp.lastIndex = 0;
+                if (!exp.test(val)) {
+                    return msg;
+                }
+                return true;
+            }
+        }
+
         var e = React.createElement;
         var PetEntity = (props) => {
             return (
-                e(bifrost.Entity, {fieldName: props.fieldName, fieldIndex: props.fieldIndex},
-                    e(bifrost.TextInput, {fieldName: 'name', label: 'Pet Name: ' }),
-                    e(bifrost.TextInput, {fieldName: 'age', label: 'Pet Age: '}),
+                e(fo.Entity, {fieldName: props.fieldName, fieldIndex: props.fieldIndex},
+                    e(fo.TextInput, {fieldName: 'petName', label: 'Pet Name: ', validators: [matches(/[Oo]$/, 'Must End with o')] }),
+                    e(fo.TextInput, {fieldName: 'petAge', label: 'Pet Age: ', validators: [matches(/^\d+$/, 'Must be a number')]}),
                 )
             );
         };
 
-        var PetCollection = e(bifrost.Collection, {field: PetEntity, fieldName: 'pets', fieldLabel: 'Pet: '});
-        var UnorderedCollection = e(bifrost.Collection, {field: bifrost.TextInput, fieldName: 'unorderedCollection', fieldLabel: 'Item: ', ordered: false});
-        var NameEntity = e(bifrost.Entity, {fieldName: 'name'},
-            e(bifrost.TextInput, {fieldName: 'firstName', label: 'First Name: '}),
-            e(bifrost.TextInput, {fieldName: 'lastName', label: 'Last Name: '}),
-            e(bifrost.Entity, {fieldName: 'aka'},
-                e(bifrost.TextInput, {fieldName: 'alias', label: 'Alias: '})
+        var PetCollection = e(fo.Collection, {field: PetEntity, fieldName: 'pets', fieldLabel: 'Pet: '});
+        var UnorderedCollection = e(fo.Collection, {field: fo.TextInput, fieldName: 'unorderedCollection', fieldLabel: 'Item: ', ordered: false});
+        var NameEntity = e(fo.Entity, {fieldName: 'name'},
+            e(fo.TextInput, {fieldName: 'firstName', label: 'First Name: '}),
+            e(fo.TextInput, {fieldName: 'lastName', label: 'Last Name: '}),
+            e(fo.Entity, {fieldName: 'aka'},
+                e(fo.TextInput, {fieldName: 'alias', label: 'Alias: '})
             )
         );
         var ShowCase = createReactClass({
             render: function () {
-                return e(bifrost.Form, null,
+                return e(fo.Form, {name: 'person'},
                     NameEntity,
-                    e(bifrost.TextInput, {fieldName: 'phone', fieldIndex: 0, label: 'Home Phone: '}),
-                    e(bifrost.TextInput, {fieldName: 'phone', fieldIndex: 1, label: 'Cell Phone: '}),
+                    e(fo.TextInput, {fieldName: 'phone', fieldIndex: 0, label: 'Home Phone: ', validators: [isNotEmpty]}),
+                    e(fo.TextInput, {fieldName: 'phone', fieldIndex: 1, label: 'Cell Phone: '}),
                     PetCollection,
                     UnorderedCollection
                 )

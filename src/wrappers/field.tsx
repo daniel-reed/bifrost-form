@@ -41,14 +41,18 @@ export class Field implements IField {
         return this;
     };
 
-    getError = (): string => {
-        return this.hasError() ? this.error : "";
+    getError = (): string | undefined => {
+        return this.hasError() ? this.error : undefined;
     };
 
     setError = (error: string, update: boolean = true): Field => {
         this.error = error;
         if (update) this.component.forceUpdate();
         return this;
+    };
+
+    getHtmlName = (): string => {
+        return this.getFormName() + "_" + this.getFieldName();
     };
 
     getFieldName = (): string => {
@@ -81,6 +85,10 @@ export class Field implements IField {
         return this;
     };
 
+    getFormName = (): string => {
+        return '';
+    };
+
     getLabel = (): string => {
         return this.component.props.label;
     };
@@ -95,7 +103,16 @@ export class Field implements IField {
         return this.error !== undefined
     };
 
-    validate = (): boolean => {
+    getErrorId = (): string => {
+        return ([
+            this.getFormName(),
+            this.getFieldName(),
+            this.getFieldIndex(),
+            "error"
+        ]).join("_");
+    };
+
+    validate = (v?: any, update: boolean = true): boolean => {
         for (let i = 0; i < this.validators.length; i++) {
             let result = this.validators[i](this.value, this);
             if (typeof result === "string") {
@@ -110,7 +127,7 @@ export class Field implements IField {
                 this.error = undefined;
             }
         }
-        this.component.forceUpdate();
+        if (update) this.component.forceUpdate();
         return this.error === undefined;
     };
 
@@ -156,7 +173,8 @@ export class Field implements IField {
 export enum IFieldType {
     Object = "object",
     Array = "array",
-    String = "string"
+    String = "string",
+    Collection = "collection",
 }
 
 export interface IField {
@@ -164,10 +182,13 @@ export interface IField {
     setDefaultError(error: string, update?: boolean): IField;
     getDefaultValue(): any;
     setDefaultValue(val: any, update?: boolean): IField;
-    getError(): string;
+    getError(): string | undefined;
     setError(error: string, update?: boolean): IField;
+    getErrorId(): string;
+    getHtmlName(): string;
     getFieldName(): string;
     setFieldName(fieldName: string, update?: boolean): IField;
+    getFormName(): string;
     getFieldIndex(): number;
     setFieldIndex(fieldIndex: number, update?: boolean): IField;
     getFocus(): boolean;
@@ -182,7 +203,7 @@ export interface IField {
     getValue(): any;
     setValue(v: any, update?: boolean): IField;
     hasError(): boolean;
-    validate(v?: any): boolean;
+    validate(v?: any, update?: boolean): boolean;
 }
 
 export type FieldProps = {
@@ -238,6 +259,7 @@ export const asField = <T extends FieldProps>() => {
                 this.field.setDefaultError(props.defaultError, false);
                 this.field.setFieldIndex(props.fieldIndex, false);
                 this.field.setFieldName(props.fieldName, false);
+                this.field.getFormName = this.form.getFormName;
                 if (props.validators) {
                     for (const validator of props.validators) {
                         this.field.addValidator(validator, false);
@@ -261,7 +283,7 @@ export const asField = <T extends FieldProps>() => {
             cleanProps = (): any  => {
                 const ptProps = Object.assign({}, this.props as any, this.orideProps);
                 ptProps.value = this.field.getValue();
-                ptProps.name = this.field.getFieldName() + "_" + this.field.getFieldIndex();
+                ptProps.name = this.field.getHtmlName();
                 for (const k of AsField.stripProps) {
                     delete ptProps[k];
                 }
@@ -277,15 +299,16 @@ export const asField = <T extends FieldProps>() => {
             }
 
             handleChange = (event: React.ChangeEvent<any>): void => {
-                this.field.setValue(event.target.value);
+                this.field.setValue(event.target.value, false);
                 if (this.field.getError() !== undefined) this.field.validate();
+                this.forceUpdate();
                 if (typeof this.props.onChange === 'function') {
                     this.props.onChange(event);
                 }
             };
 
             handleFocus = (event: React.FocusEvent<any>): void => {
-                this.field.setFocus(true);
+                this.field.setFocus(true, false);
                 this.forceUpdate();
                 if (typeof this.props.onFocus === 'function') {
                     this.props.onFocus(event)
@@ -293,8 +316,9 @@ export const asField = <T extends FieldProps>() => {
             };
 
             handleBlur = (event: React.FocusEvent<any>): void => {
-                this.field.setFocus(false);
-                this.field.validate();
+                this.field.setFocus(false, false);
+                this.field.validate(undefined, false);
+                this.forceUpdate();
                 if (typeof this.props.onBlur === 'function') {
                     this.props.onBlur(event)
                 }

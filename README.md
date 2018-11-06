@@ -6,22 +6,18 @@ This is a work in progress.
 
 ## Initial Release TODO
 
-- [ ] Finish Basic Field Components
-- [ ] Test Validation At Field Level, Entity Level, Collection Level, and Form Level
-- [ ] Add Form onSubmit
-- [ ] Expand Wrapper Tests
-- [ ] Implement field Tests
-
-## Support Independent Form Validation
-
-- [ ] Provide a Form api that provides functions to transform a configuration into a raw form or a react representation  
-
-## Fixes to consider
-- [ ] Find a way not to use `any` in `cleanProps()`
-- [ ] Find a way not to use `any` in `getValue()` and `setValue()`
-
-## Features to consider
-- [ ] Add optional redux integration
-- [ ] Add listeners for onDisplay and onError
-- [ ] Add JSON Defined Builder
-- [ ] Ensure strong accessibility
+- Allow Custom ItemContainer
+- Allow Custom "Add Item" Button
+- Allow Loading Initial Form Data
+- Add Form onSubmit
+- Consider whether the field wrapper should set aria-describedby and aria-invalid
+    - aria-invalid should definitely be set
+    - aria-describedby relies on the error implementation setting the id properly
+    - not setting them puts more burden on core input implementations to get it right
+- Finish Basic Field Components
+- Ensure strong accessibility   
+- Add listeners for onDisplay and onError
+- Add Validation at Collection, Entity, and Form Level
+- Find a better name than bifrost
+- Provide sane default css
+- Audit manual forceUpdate implementation

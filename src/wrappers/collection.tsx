@@ -9,7 +9,7 @@ export class Collection extends Field implements ICollection  {
     component: React.Component<any, any>;
     form: IForm;
     parent: IForm;
-    type: IFieldType = IFieldType.Object;
+    type: IFieldType = IFieldType.Collection;
 
     fieldOrder: number[] = [];
 
@@ -22,6 +22,10 @@ export class Collection extends Field implements ICollection  {
             return 'collection';
         };
 
+        this.form.getFormName = function(): string {
+            return this.parent.getFormName() + "_" + this.getFieldName();
+        }.bind(this);
+
         this.form.deregisterField = function(field: IField) {
             // We are not removing fields once registered
             const index = this.getIndexFromField(field);
@@ -29,6 +33,27 @@ export class Collection extends Field implements ICollection  {
             delete this.fields.get(name)[index];
             this.component.forceUpdate();
         }.bind(this.form);
+
+        this.form.forEach = function(fn: (field?: IField) => any): void {
+            for (const fieldIndex of this.fieldOrder) {
+                const fields = this.form.getFields('collection');
+                if (!fields) break;
+                const field = fields[fieldIndex];
+                if (!field) continue;
+                fn(field)
+            }
+        }.bind(this);
+
+        this.form.hasError = function (): boolean {
+            for (const fieldIndex of this.fieldOrder) {
+                const fields = this.form.getFields('collection');
+                if (!fields) break;
+                const field = fields[fieldIndex];
+                if (!field) continue;
+                if (field.hasError()) return true;
+            }
+            return false;
+        }.bind(this);
     }
 
     getForm = (): IForm => {
@@ -53,6 +78,10 @@ export class Collection extends Field implements ICollection  {
 
     validate = (): boolean => {
         return this.form.validate();
+    };
+
+    hasError = (): boolean => {
+        return this.form.hasError();
     };
 
     getValue = (): any => {
@@ -162,14 +191,14 @@ export type ItemContainerProps = {
 export class ItemContainer extends React.Component<ItemContainerProps> {
     render() {
         let buttons = [
-            <button onClick={this.handleAddClick}><i className="fas fa-plus"/></button>,
-            <button onClick={this.handleRemoveClick}><i className="fas fa-minus"/></button>
+            <button key="add" onClick={this.handleAddClick}><i className="fas fa-plus"/></button>,
+            <button key="remove" onClick={this.handleRemoveClick}><i className="fas fa-minus"/></button>
         ];
 
         if (this.props.ordered) {
             buttons.push(
-                <button onClick={this.handleMoveUpClick}><i className="fas fa-arrow-up"/></button>,
-                <button onClick={this.handleMoveDownClick}><i className="fas fa-arrow-down"/></button>
+                <button key="up" onClick={this.handleMoveUpClick}><i className="fas fa-arrow-up"/></button>,
+                <button key="down" onClick={this.handleMoveDownClick}><i className="fas fa-arrow-down"/></button>
             );
         }
 
@@ -253,7 +282,7 @@ export const asCollection = <T extends CollectionProps>() => {
 
                 for (let [pos, fieldIndex] of this.collection.getFieldOrder().entries()) {
                     let props: FieldProps = Object.assign({}, this.props.fieldProps || {}, {
-                        fieldName: "collection",
+                        fieldName: fieldIndex,
                         fieldIndex: fieldIndex,
                         label: this.props.fieldLabel,
                     });

@@ -13,7 +13,7 @@ export class UCollection extends React.Component<UCollectionProps> {
     }
 
     render() {
-        const { className, children, onAddClick, label, ...ptProps } = this.props;
+        const { className, children, onAddClick, label, ordered, ...ptProps } = this.props;
         const cn = mergeClass(className, ["bifrost-form-collection"]);
         return (
             <div className={cn} {...ptProps}>
