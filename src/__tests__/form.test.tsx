@@ -3,7 +3,7 @@ import * as ReactDOM from 'react-dom'
 import * as TestUtils from 'react-dom/test-utils'
 import {Form, UForm} from  "../components/Form"
 
-test('Form renders', () => {
+test('FormController renders', () => {
     const div = document.createElement('div');
     const render = () => {
         ReactDOM.render(<Form/>, div)
@@ -11,7 +11,7 @@ test('Form renders', () => {
     expect(render).not.toThrow();
 });
 
-test('Form context is defined', () => {
+test('FormController context is defined', () => {
     const container = TestUtils.renderIntoDocument(<Form/>) as React.Component<any,{}>;
     const form = TestUtils.findRenderedComponentWithType(container, UForm);
     expect(form.context.form).toBeDefined();

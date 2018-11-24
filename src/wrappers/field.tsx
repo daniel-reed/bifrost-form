@@ -1,10 +1,10 @@
 import * as React from 'react'
 import {IForm, FormContext} from "./form";
-import {getDisplayName} from "./util";
+import {getDisplayName, IAbstractComponent} from "./util";
 import {Validator} from "../validation/validator";
 
 export class Field implements IField {
-    component: React.Component<any, any>;
+    component: IAbstractComponent;
     defaultError: string = "Invalid Value";
     defaultValue: any;
     error?: string;
@@ -16,7 +16,7 @@ export class Field implements IField {
     validators: Validator[];
     value?: any;
 
-    constructor(component: React.Component<any, any>) {
+    constructor(component: IAbstractComponent) {
         this.component = component;
         this.validators = [];
     }
@@ -168,6 +168,12 @@ export class Field implements IField {
         if (update) this.component.forceUpdate();
         return this;
     };
+
+    setValueFromJson = (json: any, update: boolean = true): Field => {
+        this.value = json;
+        if (update) this.component.forceUpdate();
+        return this;
+    }
 }
 
 export enum IFieldType {
@@ -202,6 +208,7 @@ export interface IField {
     removeValidator(validator: Validator, update?: boolean): IField;
     getValue(): any;
     setValue(v: any, update?: boolean): IField;
+    setValueFromJson(json: any, update?: boolean): IField
     hasError(): boolean;
     validate(v?: any, update?: boolean): boolean;
 }

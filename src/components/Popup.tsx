@@ -9,8 +9,8 @@ import {ChangeEvent} from "react";
 export type UPopupProps = React.HTMLProps<HTMLInputElement> & FieldProps & {
     buttonLabel?: string | React.Component,
     defaultDisplay?: string,
+    onDisplay?: (val: any) => string,
     url: string,
-
 };
 
 export type UPopupState = {
@@ -19,7 +19,11 @@ export type UPopupState = {
 
 export class UPopupInput extends React.Component<UPopupProps, UPopupState> {
     static contextType = FieldContext;
-    static defaultProps: Partial<UPopupProps> = { buttonLabel: "Edit", defaultDisplay: "Click Edit To Begin..." };
+    static defaultProps: Partial<UPopupProps> = {
+        buttonLabel: "Edit",
+        defaultDisplay: "Click Edit To Begin...",
+        onDisplay: (val: any) => { return "Value Set"}
+    };
     static popupParams = "toolbar=no,menubar=no";
     field: IField;
 
@@ -36,7 +40,7 @@ export class UPopupInput extends React.Component<UPopupProps, UPopupState> {
         const invalid = typeof this.field.getError() !== 'undefined';
         return (
             <Field>
-                <input type="text" className={cn} value={this.state.display} aria-describedby={this.field.getErrorId()} aria-invalid={invalid} readOnly={true} onChange={this.ignoreChange}/>
+                <input type="text" className={cn} value={this.props.onDisplay(val)} aria-describedby={this.field.getErrorId()} aria-invalid={invalid} readOnly={true} onChange={this.ignoreChange}/>
                 <button onClick={this.handlePopupClick}>{this.props.buttonLabel}</button>
             </Field>
         )
@@ -55,7 +59,6 @@ export class UPopupInput extends React.Component<UPopupProps, UPopupState> {
             // TODO Handle parse failure gracefully
             const message = JSON.parse(e.data);
             this.props.onChange({target: {value: message.value}} as ChangeEvent<any>);
-            this.setState({display: message.display});
         }).bind(this);
         // TODO Prevent multiple popups
         // TODO Remove event listener on unmount and window close
@@ -71,18 +74,15 @@ export const PopupInput = asField<UPopupProps>()(UPopupInput);
 export type DisplayHandler = (form: IForm) => string;
 
 
-export const newParentSubmitHandler = (display: DisplayHandler): SubmitHandler => {
-    return (e: React.FormEvent<HTMLFormElement>, form: IForm) => {
-        e.preventDefault();
-        e.stopPropagation();
-        // TODO Error Checking
-        if (window.opener) {
-            const message = {
-                display: display(form),
-                value: form.getFormValue()
-            };
-            window.opener.postMessage(JSON.stringify(message), '*');
-        }
-        window.close();
+export const parentSubmitHandler = (e: React.FormEvent<HTMLFormElement>, form: IForm) => {
+    e.preventDefault();
+    e.stopPropagation();
+    // TODO Error Checking
+    if (window.opener) {
+        const message = {
+            value: form.getFormValue()
+        };
+        window.opener.postMessage(JSON.stringify(message), '*');
     }
+    window.close();
 };

@@ -23,3 +23,7 @@ export class UForm extends React.Component<UFormProps> {
 }
 
 export const Form = asForm<UFormProps>()(UForm);
+
+export const newForm = (form: IForm): React.ComponentClass<UFormProps> => {
+    return asForm<UFormProps>(form)(UForm);
+};

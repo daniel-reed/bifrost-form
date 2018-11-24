@@ -1,9 +1,10 @@
 import * as React from 'react'
 import {getDisplayName} from "./util";
-import {Form, FormContext, IForm} from "./form";
+import {FormController, FormContext, IForm} from "./form";
 import {Field, IField, IFieldType} from "./field";
 import {Validator} from "../validation/validator";
 import {FieldProps} from "./field";
+import {AbstractComponent} from "./util";
 
 export class Collection extends Field implements ICollection  {
     component: React.Component<any, any>;
@@ -15,45 +16,69 @@ export class Collection extends Field implements ICollection  {
 
     constructor(component: React.Component<any, any>) {
         super(component);
+        const collection = this;
+        const form = new FormController();
         this.component = component;
-        this.form = new Form(component);
+        this.form = form;
+        this.form.setComponent(component);
 
         this.form.getNameFromField = function (field: IField): string {
             return 'collection';
-        };
-
-        this.form.getFormName = function(): string {
-            return this.parent.getFormName() + "_" + this.getFieldName();
-        }.bind(this);
-
-        this.form.deregisterField = function(field: IField) {
-            // We are not removing fields once registered
-            const index = this.getIndexFromField(field);
-            if (!this.hasField(name, index)) return;
-            delete this.fields.get(name)[index];
-            this.component.forceUpdate();
         }.bind(this.form);
 
+        this.form.getFormName = function(): string {
+            return collection.parent.getFormName() + "_" + collection.getFieldName();
+        }.bind(form);
+
+        this.form.deregisterField = function(field: IField) {
+            // We are deleting fields (setting to undefined)
+            // but not removing them from the map when deregistered.
+            // This simplifies our keys
+            const index = form.getIndexFromField(field);
+            if (!form.hasField(name, index)) return;
+            delete form.fields.get(name)[index];
+            form.component.forceUpdate();
+        }.bind(form);
+
+        this.form.setFormValueFromJson = function (json: any): FormController {
+            if (!Array.isArray(json)) return form;
+            if (!form.fields.has('collection')) {
+                form.fields.set('collection', []);
+            }
+            collection.fieldOrder = [];
+            for (let i = 0; i < json.length; i++) {
+                let insertAt = form.fields.get('collection').length;
+                collection.fieldOrder.push(insertAt);
+                // We use an AbstractComponent to store the value and allow
+                // the actual field (after re-render) inherit the value from
+                // the AbstractComponent
+                let field = new Field(new AbstractComponent());
+                field.setValueFromJson(json[i]);
+                form.fields.get('collection')[insertAt] = field;
+            }
+            form.component.forceUpdate();
+        }.bind(form);
+
         this.form.forEach = function(fn: (field?: IField) => any): void {
-            for (const fieldIndex of this.fieldOrder) {
-                const fields = this.form.getFields('collection');
+            for (const fieldIndex of collection.fieldOrder) {
+                const fields = form.getFields('collection');
                 if (!fields) break;
                 const field = fields[fieldIndex];
                 if (!field) continue;
                 fn(field)
             }
-        }.bind(this);
+        }.bind(form);
 
         this.form.hasError = function (): boolean {
-            for (const fieldIndex of this.fieldOrder) {
-                const fields = this.form.getFields('collection');
+            for (const fieldIndex of collection.fieldOrder) {
+                const fields = form.getFields('collection');
                 if (!fields) break;
                 const field = fields[fieldIndex];
                 if (!field) continue;
                 if (field.hasError()) return true;
             }
             return false;
-        }.bind(this);
+        }.bind(collection);
     }
 
     getForm = (): IForm => {
@@ -153,6 +178,12 @@ export class Collection extends Field implements ICollection  {
         }
         at = at || fieldsCount;
         this.insertField(fieldsCount, at);
+        if (update) this.component.forceUpdate();
+        return this;
+    };
+
+    setValueFromJson = (json: any, update: boolean = true): Field => {
+        this.form.setFormValueFromJson(json);
         if (update) this.component.forceUpdate();
         return this;
     }

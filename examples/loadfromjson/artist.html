@@ -14,6 +14,7 @@
 <div id="rmount"></div>
 <script crossorigin src="https://unpkg.com/react@16/umd/react.development.js"></script>
 <script crossorigin src="https://unpkg.com/react-dom@16/umd/react-dom.development.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@16/umd/react-dom-server.browser.development.js"></script>
 <script crossorigin src="https://unpkg.com/create-react-class@15.6.0-rc.0/create-react-class.min.js"></script>
 <script src="../../build/browser/index.js"></script>
 <script>
@@ -26,6 +27,8 @@
     }
 
     ready(function () {
+        var e = React.createElement;
+
         function isNotEmpty(val, field) {
             return !!val;
         }
@@ -53,23 +56,53 @@
             console.log(form)
         }
 
-        var e = React.createElement;
         var editIcon = e('i', {className: "fas fa-edit", title: "Edit"});
+
+        function AlbumInput (props) {
+            var ptProps = {
+                fieldName: props.fieldName,
+                fieldIndex: props.fieldIndex,
+                label: 'Album: ',
+                buttonLabel: editIcon,
+                onDisplay: displayKey('name'),
+                url: 'album.html',
+            };
+
+            return (
+                e(fo.PopupInput, ptProps)
+            )
+        }
+
+        var fc = new fo.FormController();
+        var Form = fo.newForm(fc);
 
         var ArtistForm = createReactClass({
             render: function () {
-                return e(fo.Form, {name: 'artist', onSubmit: handleSubmit},
-                    e(fo.TextInput, {fieldName: 'firstName', label: 'First Name: ', validators: [isNotEmpty]}),
-                    e(fo.TextInput, {fieldName: 'lastName', label: 'Last Name: ', validators: [isNotEmpty]}),
-                    e(fo.TextInput, {fieldName: 'age', label: 'Age: ', validators:[matches(/^[\d]+$/)]}),
-                    e(fo.PopupInput, {fieldName: 'album', label: 'Album: ', url: 'album.html', buttonLabel: editIcon,
-                    onDisplay: displayKey('name')}),
-                    e('input', {type: 'submit', value: "Submit"})
-                )
+                return (
+                    e(Form, {name: 'artist', onSubmit: handleSubmit},
+                        e(fo.Entity, {fieldName: 'person'},
+                            e(fo.TextInput, {fieldName: 'first', label: 'First Name: ', validators: [isNotEmpty]}),
+                            e(fo.TextInput, {fieldName: 'last', label: 'Last Name: ', validators: [isNotEmpty]}),
+                            e(fo.Collection, {field: AlbumInput, fieldName: 'albums', fieldLabel: 'Album: '}),
+                        ),
+                        e(fo.TextInput, {fieldName: 'age', label: 'Age: ', validators:[matches(/^[\d]+$/)]}),
+                        e('input', {type: 'submit', value: "Submit"})
+                    )
+                );
             }
         });
-
+        console.log("Rendering");
         ReactDOM.render(e(ArtistForm), document.getElementById('rmount'));
+        console.log("Registering Global \"fc\"");
+        window.fc = fc;
+        fc.setFormValueFromJson({
+            person: {
+                first: "Michael",
+                last: "Jackson",
+                albums: [{name: "Album 1"}, {name: "Album 2"}, {name: "Album 3"}],
+            },
+            age: 12
+        })
     });
 </script>
 </body>

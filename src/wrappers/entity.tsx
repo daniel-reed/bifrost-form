@@ -1,6 +1,6 @@
 import * as React from 'react';
 import {getDisplayName} from "./util";
-import {Form, FormContext, IForm} from "./form";
+import {FormController, FormContext, IForm} from "./form";
 import {Field, IField, IFieldType} from "./field";
 import {Validator} from "../validation/validator";
 
@@ -13,7 +13,8 @@ export class Entity extends Field implements IEntity  {
     constructor(component: React.Component<any, any>) {
         super(component);
         this.component = component;
-        this.form = new Form(component);
+        this.form = new FormController();
+        this.form.setComponent(component);
         this.form.getFormName = function() {
             return this.parent.getFormName() + "_" + this.getFieldName();
         }.bind(this);
@@ -69,6 +70,12 @@ export class Entity extends Field implements IEntity  {
 
     getFormName = (): string => {
         return this.getParent().getFormName() + "_" + this.getFieldName();
+    };
+
+    setValueFromJson = (json: any, update: boolean = true): Field => {
+        this.form.setFormValueFromJson(json);
+        if (update) this.component.forceUpdate();
+        return this;
     }
 }
 
