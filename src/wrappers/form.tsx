@@ -156,17 +156,9 @@ export class Form implements IForm {
         if (update) this.component.forceUpdate();
         return this;
     };
-
-    onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
-        e.stopPropagation();
-        // TODO Implement
-        console.log(e);
-    }
 }
 
-// TODO Move onSubmit out of IForm
-// TODO Add setValue
+// TODO Add setFormValue
 export interface IForm {
     deregisterField(field: IField): void
     forEach(fn: (field?: IField) => void): void
@@ -178,7 +170,6 @@ export interface IForm {
     getFormValue(): any
     hasError(): boolean
     hasField(k: string, i: number): boolean
-    onSubmit(e: React.FormEvent<HTMLFormElement>): void
     registerField(field: IField): void;
     getNameFromField(field: IField): string
     getIndexFromField(field: IField): number
@@ -190,34 +181,54 @@ export interface IForm {
     validateField(k: string, i: number): boolean
 }
 
+export type SubmitHandler = (e?: React.FormEvent<HTMLFormElement>, form?: IForm) => void;
+
 export type FormProps = {
-    name: string
+    name: string,
+    onSubmit?: SubmitHandler
 }
 
 export const FormContext = React.createContext({});
 
-export const asForm = <T extends FormProps>() => {
+export const asForm = <T extends FormProps>(form?: IForm) => {
     return function (WrappedComponent: React.ComponentClass<T>): React.ComponentClass<T> {
         return class WithForm extends React.Component<T> {
             static displayName: string = `AsForm(${getDisplayName(WrappedComponent)})`;
             form: IForm;
+            orideProps: Partial<FormProps>;
 
             constructor(props: T) {
                 super(props);
                 this.form = new Form(this);
                 this.form.setFormName(props.name, false);
+                this.orideProps = {
+                    onSubmit: this.handleSubmit,
+                }
             }
 
             render() {
                 return (
                     <FormContext.Provider value={this.form}>
-                        <WrappedComponent {...this.props}/>
+                        <WrappedComponent {...this.cleanProps()}/>
                     </FormContext.Provider>
                 );
             }
 
+            cleanProps = (): any => {
+                const ptProps = Object.assign({}, this.props as any, this.orideProps);
+                ptProps.name = this.form.getFormName();
+                return ptProps;
+            };
+
             componentWillReceiveProps() {
                 // TODO Make sure entity is up to date with props
+            }
+
+            handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+                // TODO Provide Default Submission behavior for post/get
+                if (typeof this.props.onSubmit === 'function') {
+                    this.props.onSubmit(e, this.form);
+                }
             }
         }
     }

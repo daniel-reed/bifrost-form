@@ -1,9 +1,9 @@
-import * as React from 'react'
+import * as React from 'react';
 import {Field} from "./Field";
 import {FieldProps, asField, FieldContext, IField} from "../wrappers/field";
 import {mergeClass} from "./ClassHelpers";
 
-export type UInputProps = React.HTMLProps<HTMLInputElement> & FieldProps
+export type UInputProps = React.HTMLProps<HTMLInputElement> & FieldProps;
 
 export class UTextInput extends React.Component<UInputProps> {
     static contextType = FieldContext;

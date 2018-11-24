@@ -280,7 +280,7 @@ export const asField = <T extends FieldProps>() => {
                 );
             }
 
-            cleanProps = (): any  => {
+            cleanProps = (): any => {
                 const ptProps = Object.assign({}, this.props as any, this.orideProps);
                 ptProps.value = this.field.getValue();
                 ptProps.name = this.field.getHtmlName();

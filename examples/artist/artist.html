@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8">
     <meta http-equiv="x-ua-compatible" content="ie=edge">
-    <title>Showcase</title>
+    <title>Artist</title>
     <meta name="description" content="">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/all.css" integrity="sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU" crossorigin="anonymous">
@@ -40,26 +40,6 @@
             }
         }
 
-        var e = React.createElement;
-        var PetEntity = (props) => {
-            return (
-                e(fo.Entity, {fieldName: props.fieldName, fieldIndex: props.fieldIndex},
-                    e(fo.TextInput, {fieldName: 'petName', label: 'Pet Name: ', validators: [matches(/[Oo]$/, 'Must End with o')] }),
-                    e(fo.TextInput, {fieldName: 'petAge', label: 'Pet Age: ', validators: [matches(/^\d+$/, 'Must be a number')]}),
-                )
-            );
-        };
-
-        var PetCollection = e(fo.Collection, {field: PetEntity, fieldName: 'pets', fieldLabel: 'Pet: '});
-        var UnorderedCollection = e(fo.Collection, {field: fo.TextInput, fieldName: 'unorderedCollection', fieldLabel: 'Item: ', ordered: false});
-        var NameEntity = e(fo.Entity, {fieldName: 'name'},
-            e(fo.TextInput, {fieldName: 'firstName', label: 'First Name: '}),
-            e(fo.TextInput, {fieldName: 'lastName', label: 'Last Name: '}),
-            e(fo.Entity, {fieldName: 'aka'},
-                e(fo.TextInput, {fieldName: 'alias', label: 'Alias: '})
-            )
-        );
-
         function handleSubmit(e, form) {
             e.preventDefault();
             e.stopPropagation();
@@ -67,20 +47,22 @@
             console.log(form)
         }
 
-        var ShowCase = createReactClass({
+        var e = React.createElement;
+        var editIcon = e('i', {className: "fas fa-edit", title: "Edit"});
+
+        var ArtistForm = createReactClass({
             render: function () {
-                return e(fo.Form, {name: 'person', onSubmit: handleSubmit},
-                    NameEntity,
-                    e(fo.TextInput, {fieldName: 'phone', fieldIndex: 0, label: 'Home Phone: ', validators: [isNotEmpty]}),
-                    e(fo.TextInput, {fieldName: 'phone', fieldIndex: 1, label: 'Cell Phone: '}),
-                    PetCollection,
-                    UnorderedCollection,
+                return e(fo.Form, {name: 'artist', onSubmit: handleSubmit},
+                    e(fo.TextInput, {fieldName: 'firstName', label: 'First Name: ', validators: [isNotEmpty]}),
+                    e(fo.TextInput, {fieldName: 'lastName', label: 'Last Name: ', validators: [isNotEmpty]}),
+                    e(fo.TextInput, {fieldName: 'age', label: 'Age: ', validators:[matches(/^[\d]+$/)]}),
+                    e(fo.PopupInput, {fieldName: 'album', label: 'Album: ', url: 'album.html', buttonLabel: editIcon}),
                     e('input', {type: 'submit', value: "Submit"})
                 )
             }
         });
 
-        ReactDOM.render(e(ShowCase), document.getElementById('rmount'));
+        ReactDOM.render(e(ArtistForm), document.getElementById('rmount'));
     });
 </script>
 </body>

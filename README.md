@@ -220,11 +220,20 @@ Consider the case of extending our artist definition to allow albums to be added
 
 ## Initial Release TODO
 
-- Change `validators` to `onValidate`
 - Allow Custom `ItemContainer`
 - Allow Custom `Add Item` Button
 - Allow Loading Initial Form Data
+- Allow Loading Initial Form Data from Query String
+- Specify Cross Window Message Data Format
+    - It should be parsable without a full JSON.parse call.
+    - It should identify the target handler so handlers can listen to only their messages
 - Add Form onSubmit
+    - Determine how to handle validation on submit (e.g. Forced or Optional)
+    - Provide a default GET submission
+    - Provide a default POST submission
+    - Provide a default JSON POST submission
+- Prevent duplicate submission
+- Cleanup TODO's
 - Update Readme to include form submission
 - Update Readme to include Cross-Field Validation
 - Consider whether the field wrapper should set aria-describedby and aria-invalid
@@ -232,8 +241,10 @@ Consider the case of extending our artist definition to allow albums to be added
     - aria-describedby relies on the error implementation setting the id properly
     - not setting them puts more burden on core input implementations to get it right
 - Finish Basic Field Components
-- Ensure strong accessibility   
 - Add listeners for onDisplay and onError
 - Add Validation at Collection, Entity, and Form Level
+- Ensure strong accessibility
 - Provide sane default css
+- Review default class names
+- Allow class names to be set through configuration at runtime
 - Audit manual forceUpdate implementation

@@ -14,10 +14,10 @@ export class UForm extends React.Component<UFormProps> {
     }
 
     render() {
-        const { onSubmit, className, ...ptProps } = this.props;
+        const { className, ...ptProps } = this.props;
         const cn = mergeClass(className, ["bifrost-form"]);
         return (
-            <form className={cn} onSubmit={this.form.onSubmit} {...ptProps}/>
+            <form className={cn} {...ptProps}/>
         );
     }
 }
