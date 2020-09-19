@@ -2,7 +2,7 @@ import * as React from 'react';
 import {getDisplayName} from "./util";
 import {FormController, FormContext, IForm} from "./form";
 import {Field, IField, IFieldType} from "./field";
-import {Validator} from "../validation/validator";
+import {Validator} from "..";
 
 export class Entity extends Field implements IEntity  {
     component: React.Component<any, any>;

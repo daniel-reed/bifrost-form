@@ -2,8 +2,7 @@ import * as React from 'react';
 import {Field} from "./Field";
 import {FieldProps, asField, FieldContext, IField} from "../wrappers/field";
 import {mergeClass} from "./ClassHelpers";
-import {IForm} from "..";
-import {SubmitHandler} from "../wrappers/form";
+import {IForm} from "../wrappers/form";
 import {ChangeEvent} from "react";
 
 export type UPopupProps = React.HTMLProps<HTMLInputElement> & FieldProps & {
@@ -22,7 +21,7 @@ export class UPopupInput extends React.Component<UPopupProps, UPopupState> {
     static defaultProps: Partial<UPopupProps> = {
         buttonLabel: "Edit",
         defaultDisplay: "Click Edit To Begin...",
-        onDisplay: (val: any) => { return "Value Set"}
+        onDisplay: () => { return "Value Set"}
     };
     static popupParams = "toolbar=no,menubar=no";
     field: IField;
@@ -34,13 +33,12 @@ export class UPopupInput extends React.Component<UPopupProps, UPopupState> {
     }
 
     render() {
-        let { value, className, onChange, readOnly, ...ptProps } = this.props;
+        let {className} = this.props;
         const cn = mergeClass(className, ["bifrost-field__popup"]);
-        const val = value ? value : "";
         const invalid = typeof this.field.getError() !== 'undefined';
         return (
             <Field>
-                <input type="text" className={cn} value={this.props.onDisplay(val)} aria-describedby={this.field.getErrorId()} aria-invalid={invalid} readOnly={true} onChange={this.ignoreChange}/>
+                <input type="text" className={cn} value={this.props.onDisplay("")} aria-describedby={this.field.getErrorId()} aria-invalid={invalid} readOnly={true} onChange={this.ignoreChange}/>
                 <button onClick={this.handlePopupClick}>{this.props.buttonLabel}</button>
             </Field>
         )
@@ -54,12 +52,12 @@ export class UPopupInput extends React.Component<UPopupProps, UPopupState> {
     handlePopupClick = (e: React.MouseEvent<HTMLButtonElement>) => {
         e.preventDefault();
 
-        const handleMessage = ((e: MessageEvent) => {
+        const handleMessage = (e: MessageEvent) => {
             window.removeEventListener("message", handleMessage);
             // TODO Handle parse failure gracefully
             const message = JSON.parse(e.data);
             this.props.onChange({target: {value: message.value}} as ChangeEvent<any>);
-        }).bind(this);
+        }
         // TODO Prevent multiple popups
         // TODO Remove event listener on unmount and window close
         // TODO Determine Channel format

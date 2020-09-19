@@ -1,5 +1,5 @@
-const resolve = require('rollup-plugin-node-resolve');
-const babel = require('rollup-plugin-babel');
+import { nodeResolve } from '@rollup/plugin-node-resolve'
+import babel from '@rollup/plugin-babel'
 
 export default {
     input: 'build/module/index.js',
@@ -8,13 +8,8 @@ export default {
         'react-dom'
     ],
     plugins: [
-        resolve(),
-        babel({
-            exclude: 'node_modules/**',
-            presets: [
-                ["@babel/preset-env", {"modules": false}]
-            ],
-        }),
+        nodeResolve(),
+        babel({ babelHelpers: 'bundled'}),
     ],
     output: {
         globals: {

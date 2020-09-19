@@ -1,7 +1,7 @@
 import * as React from 'react'
 import {IForm, FormContext} from "./form";
 import {getDisplayName, IAbstractComponent} from "./util";
-import {Validator} from "../validation/validator";
+import {Validator} from "..";
 
 export class Field implements IField {
     component: IAbstractComponent;

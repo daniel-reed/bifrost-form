@@ -10,15 +10,16 @@
     "sourceMap": true,
     "target": "es6",
     "jsx": "react",
-    "outDir": "build/main"
+    "outDir": "build/main",
+    "skipLibCheck": true
   },
   "include": [
     "src/index.ts"
   ],
   "exclude": [
     "build",
-    "node_modules",
     "tests",
+    ".yarn/cache",
     "**/*.test.ts",
     "**/*.test.tsx",
     "**/*.test.js",

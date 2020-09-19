@@ -1,7 +1,7 @@
 import * as React from 'react';
 import {IField, IFieldType} from "./field";
 import {getDisplayName} from "./util";
-import {Validator} from "../validation/validator";
+import {Validator} from "..";
 
 export class FormController implements IForm {
     component: React.Component<any, any>;
@@ -29,8 +29,8 @@ export class FormController implements IForm {
     };
 
     forEach = (fn: (field?: IField) => any): void => {
-        for (let [name, fields] of this.fields) {
-            for (let [k, field] of fields.entries()) {
+        for (let [, fields] of this.fields) {
+            for (let [, field] of fields.entries()) {
                 fn(field);
             }
         }
@@ -84,7 +84,7 @@ export class FormController implements IForm {
 
     getFormValue = (): any => {
         let fv: any = {};
-        for (let [name, fields] of this.fields) {
+        for (let [name] of this.fields) {
             fv[name] = this.getValue(name);
         }
         return fv;
@@ -111,8 +111,8 @@ export class FormController implements IForm {
     };
 
     hasError = (): boolean => {
-        for (let [name, fields] of this.fields) {
-            for (let [k, field] of fields.entries()) {
+        for (let [, fields] of this.fields) {
+            for (let [, field] of fields.entries()) {
                 if (field.hasError()) return true;
             }
         }

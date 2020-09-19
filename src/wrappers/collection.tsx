@@ -2,7 +2,7 @@ import * as React from 'react'
 import {getDisplayName} from "./util";
 import {FormController, FormContext, IForm} from "./form";
 import {Field, IField, IFieldType} from "./field";
-import {Validator} from "../validation/validator";
+import {Validator} from "..";
 import {FieldProps} from "./field";
 import {AbstractComponent} from "./util";
 
@@ -22,7 +22,7 @@ export class Collection extends Field implements ICollection  {
         this.form = form;
         this.form.setComponent(component);
 
-        this.form.getNameFromField = function (field: IField): string {
+        this.form.getNameFromField = function (): string {
             return 'collection';
         }.bind(this.form);
 
@@ -313,7 +313,7 @@ export const asCollection = <T extends CollectionProps>() => {
 
                 for (let [pos, fieldIndex] of this.collection.getFieldOrder().entries()) {
                     let props: FieldProps = Object.assign({}, this.props.fieldProps || {}, {
-                        fieldName: fieldIndex,
+                        fieldName: "" + fieldIndex,
                         fieldIndex: fieldIndex,
                         label: this.props.fieldLabel,
                     });

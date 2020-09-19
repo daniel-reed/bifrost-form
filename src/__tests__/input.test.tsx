@@ -7,15 +7,15 @@ import {TextInput, UTextInput} from "../components/Input";
 test('TextInput renders', () => {
     const div = document.createElement('div');
     const render = () => {
-        ReactDOM.render(<Form><TextInput fieldName="Name" label="Name"/></Form>, div)
+        ReactDOM.render(<Form name="TestForm"><TextInput fieldName="Name" label="Name"/></Form>, div)
     };
     expect(render).not.toThrow();
 });
 
 test('TextInput is working', () => {
-    const form = TestUtils.renderIntoDocument(<Form><TextInput fieldName="Name" label="Name"/></Form>) as React.Component<any,{}>;
+    const form = TestUtils.renderIntoDocument(<Form name="TestForm"><TextInput fieldName="Name" label="Name"/></Form>) as unknown as React.Component<any,{}>;
     const textInput = TestUtils.findRenderedComponentWithType(form, UTextInput);
-    const field = textInput.context.field;
+    const field = textInput.field;
     expect(field).toBeDefined();
 
     const input = TestUtils.findRenderedDOMComponentWithTag(textInput, 'input') as any;
